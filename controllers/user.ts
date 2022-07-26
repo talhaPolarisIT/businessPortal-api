@@ -21,13 +21,15 @@ interface MulterRequest extends Request {
 }
 
 export default () => {
-  const models = require('../database/models');
+  const models = require('../db/models');
   const { user: User } = models;
 
   return {
     register: async (req: Request, res: Response) => {
       const { name, email, password, inDarkMode } = req.body;
       try {
+        console.log("HERE");
+        res.status(200).json({message: "HERE"})
         const existing = await User.findOne({ where: { email } });
         if (existing) {
           res.status(403).json({ message: 'User with email already exists.' });

@@ -5,7 +5,7 @@ import user from '../controllers/user';
 
 export const getRoutes=()=>{
     const router = express();
-    const model = require('../database/models')
+    const model = require('../db/models')
     
     const userController = user();
 

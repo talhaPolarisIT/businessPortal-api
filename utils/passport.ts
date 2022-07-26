@@ -3,7 +3,7 @@ import passportLocal from 'passport-local';
 import bcrypt from 'bcryptjs';
 import { UserDetails } from '../controllers/user';
 
-const models = require('../database/models');
+const models = require('../db/models');
 
 passport.serializeUser<any, any>((req, user, done) => {
   done(undefined, user);

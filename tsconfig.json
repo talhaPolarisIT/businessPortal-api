@@ -10,8 +10,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "allowJs": true,
-    "checkJs": false
+    "allowJs": true
   },
   "exclude": ["app", "./dist/**/*"]
 }

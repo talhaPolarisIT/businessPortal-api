@@ -6,7 +6,7 @@ export interface ILocalUserRequest extends Request {
   localUser: any;
 }
 
-const models = require('../database/models');
+const models = require('../db/models');
 
 export default async (req: IAuth0MiddlewareRequest, res: Response, next: NextFunction) => {
   const { user: User } = models;

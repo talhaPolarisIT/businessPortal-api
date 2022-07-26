@@ -1,6 +1,6 @@
 import http from "http";
 import express, { Express, Request, Response, NextFunction } from "express";
-import helmet from "helmet";
+// import helmet from "helmet";
 import dotenv from "dotenv";
 
 import { getRoutes } from './routes';
@@ -9,13 +9,21 @@ import logger from "./utils/logger";
 
 dotenv.config();
 const main = async () => {
+
+  // const models = require('./db/models');
+  // const seed = require('./db/seed');
+
+  // await seed();
+  
+  console.log("seed: ");
+
   const NAMESPACE = "Server";
   const router: Express = express();
 
   const { PORT, SESSION_SECRET } = process.env;
   const port: number = PORT ? parseInt(PORT) : 8080;
 
-  router.use(helmet());
+  // router.use(helmet());
   router.use(express.json());
   router.use(express.urlencoded({ extended: true }));
 
