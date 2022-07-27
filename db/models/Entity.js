@@ -11,7 +11,7 @@ module.exports = (sequelize) => {
       type: Sequelize.STRING,
     },
     fields: {
-      type: Sequelize.RANGE(Sequelize.JSONB),
+      type: Sequelize.JSONB,
     },
     hasSubEntity: {
       type: Sequelize.BOOLEAN,

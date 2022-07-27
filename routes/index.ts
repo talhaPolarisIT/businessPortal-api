@@ -16,6 +16,9 @@ export const getRoutes = () => {
 
   router.post('/entity', entityController.createEntity);
   router.get('/entity', entityController.getEntities);
+  router.get('/entity/:entityId', entityController.getEntityById);
+  router.put('/entity/:entityId', entityController.updateEntity);
+  router.delete('/entity/:entityId', entityController.deleteEntity);
 
   return router;
 };
