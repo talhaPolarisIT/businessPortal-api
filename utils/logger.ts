@@ -1,6 +1,6 @@
 import bunyan from 'bunyan';
 
 export default bunyan.createLogger({
-  name: 'hortimod',
+  name: 'Business-Portal',
   src: true
 });

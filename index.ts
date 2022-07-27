@@ -10,13 +10,6 @@ import logger from "./utils/logger";
 dotenv.config();
 const main = async () => {
 
-  // const models = require('./db/models');
-  // const seed = require('./db/seed');
-
-  // await seed();
-  
-  console.log("seed: ");
-
   const NAMESPACE = "Server";
   const router: Express = express();
 
