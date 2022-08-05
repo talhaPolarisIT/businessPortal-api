@@ -11,10 +11,19 @@ module.exports = {
       name: {
         type: Sequelize.STRING,
       },
+      description: {
+        type: Sequelize.STRING,
+      },
       fields: {
-        type: Sequelize.JSONB,
+        type: Sequelize.ARRAY(Sequelize.JSONB),
       },
       hasSubEntity: {
+        type: Sequelize.BOOLEAN,
+      },
+      isDisplayonMenu: {
+        type: Sequelize.BOOLEAN,
+      },
+      isPublish: {
         type: Sequelize.BOOLEAN,
       },
       subEntityId: {

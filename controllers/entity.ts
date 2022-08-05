@@ -5,7 +5,7 @@ export default () => {
   const { entities: Entity, user: User } = models;
   return {
     createEntity: async (req: Request, res: Response) => {
-      const { name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId } = req.body;
+      const { name, description, isDisplayonMenu, isPublish, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId } = req.body;
       try {
         const createEntity = await Entity.create({
           name,
@@ -16,6 +16,9 @@ export default () => {
           superEntityId,
           isLinkedEntity,
           linkedEntity,
+          description,
+          isDisplayonMenu,
+          isPublish,
           createdBy,
           companyId,
         });
@@ -34,7 +37,7 @@ export default () => {
     },
     getEntityById: async (req: Request, res: Response) => {
       console.log(req.params);
-      
+
       const { entityId: id } = req.params;
       try {
         const entity = await Entity.findOne({ where: { id } });
