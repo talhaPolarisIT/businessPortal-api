@@ -12,11 +12,14 @@ module.exports = (sequelize) => {
       name: {
         type: Sequelize.STRING,
       },
+      databaseName: {
+        type: Sequelize.STRING,
+      },
       description: {
         type: Sequelize.STRING,
       },
       fields: {
-        type: Sequelize.ARRAY(Sequelize.JSONB),
+        type: Sequelize.JSON,
       },
       hasSubEntity: {
         type: Sequelize.BOOLEAN,
