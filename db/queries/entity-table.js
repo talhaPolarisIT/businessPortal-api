@@ -1,17 +1,19 @@
 const _default = () => {
-  const { Sequelize, DataTypes } = require('sequelize');
-  const { QueryTypes } = require('sequelize');
+  const db = require('../models/index')
+  // console.log("db: ",db)
+  // const { Sequelize, DataTypes } = require('sequelize');
+  // const { QueryTypes } = require('sequelize');
 
-  const { DB_NAME, DB_HOST, DB_USERNAME, DB_PASSWORD } = process.env;
+  // const { DB_NAME, DB_HOST, DB_USERNAME, DB_PASSWORD } = process.env;
 
-  const sequelize = new Sequelize({
-    username: DB_USERNAME,
-    password: DB_PASSWORD,
-    database: DB_NAME,
-    host: DB_HOST,
-    dialect: 'postgres',
-  });
-  const queryInterface = sequelize.getQueryInterface();
+  // const sequelize = new Sequelize({
+  //   username: DB_USERNAME,
+  //   password: DB_PASSWORD,
+  //   database: DB_NAME,
+  //   host: DB_HOST,
+  //   dialect: 'postgres',
+  // });
+  const queryInterface = db.sequelize.getQueryInterface();
 
   return {
     createTable: async (tableName, fields) => {
