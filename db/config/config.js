@@ -12,7 +12,7 @@ module.exports = {
     host: DB_HOST,
     dialect: "postgres"
   },
-  staging: {
+  production: {
     username: DB_USERNAME,
     password: DB_PASSWORD,
     database: DB_NAME,

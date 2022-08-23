@@ -2,9 +2,8 @@ import { Request, Response } from 'express';
 import EntityQueryInterface from '../db/queries/entity-table';
 export default () => {
   const models = require('../db/models');
-  const { entities: Entity, user: User } = models;
+  const { entities: Entity, user: User, entity_470732 } = models;
   const entityQueryInterface = EntityQueryInterface();
-  
   return {
     createEntity: async (req: Request, res: Response) => {
       const { name, databaseName, description, isDisplayonMenu, isPublish, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId } =
@@ -63,13 +62,13 @@ export default () => {
     updateEntity: async (req: Request, res: Response) => {
       const { entityName } = req.params;
       const { entity } = req.body;
-      const { id, name, fields, databaseName,isDisplayonMenu, isPublish, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId } = entity;
+      const { id, name, fields, databaseName, isDisplayonMenu, isPublish, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId } = entity;
       try {
         const entity = await Entity.findOne({ where: { id } });
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
           const update = await Entity.update(
-            { name, fields, databaseName, hasSubEntity,isDisplayonMenu, isPublish, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId },
+            { name, fields, databaseName, hasSubEntity, isDisplayonMenu, isPublish, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId },
             { where: { id } }
           );
           if (req.body.deletedFields) {
@@ -118,7 +117,17 @@ export default () => {
       const values = req.body;
       try {
         const insertData = await entityQueryInterface.insertRecord(entityName, values);
+
+        // const insertData = entity_470732.create({ field_995954, field_502573, field_658322, field_396853 });
+        // const tableData = await entityQueryInterface.getEntityDataByName(entityName);
+        console.log('insertData: ', insertData);
         res.status(200).json({ message: 'Record Add', insertData });
+
+        // if (insertData) {
+        //   res.status(200).json({ message: 'Record Add', insertData });
+        // } else {
+        //   res.status(500).json({ message: 'Server Error' });
+        // }
       } catch (error: any) {
         res.status(500).json({ message: 'Server Error' });
       }
@@ -129,6 +138,15 @@ export default () => {
       try {
         const updateData = await entityQueryInterface.updateRecord(entityName, recordId, values);
         res.status(200).json({ message: 'Record updated', updateData });
+      } catch (error: any) {
+        res.status(500).json({ message: 'Server Error' });
+      }
+    },
+    deleteRecord: async (req: Request, res: Response) => {
+      const { entityName, recordId } = req.params;
+      try {
+        await entityQueryInterface.deleteRecord(entityName, recordId);
+        res.status(200).json({ message: 'Record delete' });
       } catch (error: any) {
         res.status(500).json({ message: 'Server Error' });
       }

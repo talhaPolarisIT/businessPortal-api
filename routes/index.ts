@@ -23,5 +23,6 @@ export const getRoutes = () => {
 
   router.post('/entity/:entityName/record', entityController.addRecord);
   router.put('/entity/:entityName/record/:recordId', entityController.updateRecord);
+  router.delete('/entity/:entityName/record/:recordId', entityController.deleteRecord);
   return router;
 };

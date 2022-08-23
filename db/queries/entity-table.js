@@ -1,8 +1,8 @@
 const _default = () => {
-  const db = require('../models/index')
+  const db = require('../models/index');
   // console.log("db: ",db)
-  // const { Sequelize, DataTypes } = require('sequelize');
-  // const { QueryTypes } = require('sequelize');
+  const { Sequelize, DataTypes } = require('sequelize');
+  const { QueryTypes } = require('sequelize');
 
   // const { DB_NAME, DB_HOST, DB_USERNAME, DB_PASSWORD } = process.env;
 
@@ -39,8 +39,15 @@ const _default = () => {
     },
     insertRecord: async (tableName, values) => {
       try {
-        const res = await queryInterface.insert(null, tableName, values);
-        return res;
+        let res;
+        queryInterface.insert(null, tableName, values).then((res) => {
+          console.log("res ",res);
+          return res
+        }).catch((error)=>{
+          console.log("error: ", error);
+          return error
+        })
+        // return res;
       } catch (error) {
         console.log('ERROR IS insertTable() -> tableName ', tableName, values);
       }
@@ -70,6 +77,14 @@ const _default = () => {
       const { id, ...remainingValues } = values;
       try {
         await queryInterface.bulkUpdate(tableName, remainingValues, { id: recordId });
+        return;
+      } catch (error) {
+        console.log('ERROR: ', error);
+      }
+    },
+    deleteRecord: async (tableName, recordId) => {
+      try {
+        await queryInterface.bulkDelete(tableName, { id: recordId });
         return;
       } catch (error) {
         console.log('ERROR: ', error);
