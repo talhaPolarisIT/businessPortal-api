@@ -2,6 +2,11 @@ import passport from 'passport';
 import passportLocal from 'passport-local';
 import bcrypt from 'bcryptjs';
 import { UserDetails } from '../controllers/user';
+import passportjwt from 'passport-jwt';
+import { secretKey } from './auth';
+
+const JwtStrategy = passportjwt.Strategy;
+const ExtractJwt = passportjwt.ExtractJwt;
 
 const models = require('../db/models');
 
@@ -14,21 +19,41 @@ passport.deserializeUser(async (user: UserDetails, done) => {
   done(!existing ? { message: 'User not found.' } : null, existing);
 });
 
-passport.use(new passportLocal.Strategy({
-  usernameField: 'email',
-  passwordField: 'pwd',
-}, async (email, pwd, done) => {
-  const user = await models.user.findOne({ where: { email } });
-  if (!user) return done(null, false, { message: 'User not found.' });
-  const validPassword = bcrypt.compareSync(pwd, user.password);
-  if (!validPassword) return done(null, false, { message: 'Incorect password.' });
+var opts = {
+  jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+  secretOrKey: secretKey,
+};
 
-  return done(null, {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    inDarkMode: user.inDarkMode,
-  }, { message: 'User logged in.' });
-}));
+passport.use(
+  new passportLocal.Strategy(async (email, password, done) => {
+    const user = await models.user.findOne({ where: { email } });
+    if (!user) return done(null, false, { message: 'User not found.' });
+    const validPassword = bcrypt.compareSync(password, user.password);
+    if (!validPassword) return done(null, false, { message: 'Incorect password.' });
 
+    return done(
+      null,
+      {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
+      { message: 'User logged in.' }
+    );
+  })
+);
+
+passport.use(
+  new JwtStrategy(opts, async (jwt_payload, done) => {
+    console.log('JWT payload: ', jwt_payload);
+    try {
+      const User = await models.user.findOne({ where: { id: jwt_payload.id } });
+      console.log('User: ', User);
+
+      return done(null, User, { message: 'User found.' });
+    } catch (error) {
+      return done(null, false, { message: 'User not found.' });
+    }
+  })
+);
 export default passport;

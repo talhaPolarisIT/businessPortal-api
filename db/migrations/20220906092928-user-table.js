@@ -18,8 +18,30 @@ module.exports = {
       password: {
         type: Sequelize.STRING,
       },
-      inDarkMode: {
+      country: {
+        type: Sequelize.STRING,
+      },
+      isActive: {
         type: Sequelize.BOOLEAN,
+      },
+      isPasswordUpdated: {
+        type: Sequelize.BOOLEAN,
+      },
+      verificationCode: {
+        type: Sequelize.INTEGER,
+      },
+      isCheckReq: {
+        type: Sequelize.BOOLEAN,
+      },
+      userGroupId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: 'userGroup',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'SET NULL',
+        defaultValue: null,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -27,10 +49,10 @@ module.exports = {
       updatedAt: {
         type: Sequelize.DATE,
       },
-    })
+    });
   },
 
   down: async (queryInterface, Sequelize) => {
     await queryInterface.dropTable('users');
-  }
+  },
 };

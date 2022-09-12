@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import EntityQueryInterface from '../db/queries/entity-table';
+
 export default () => {
   const models = require('../db/models');
   const { entities: Entity, user: User, entity_470732 } = models;
@@ -105,7 +106,7 @@ export default () => {
         const entity = await Entity.findOne({ where: { id } });
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
-          const update = await Entity.destroy({ where: { id } });
+          const deleted = await Entity.destroy({ where: { id } });
           res.status(200).json({ message: `Entity ${id} Deleted` });
         }
       } catch (error) {

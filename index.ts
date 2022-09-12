@@ -3,6 +3,7 @@ import express, { Express, Request, Response, NextFunction } from 'express';
 // import helmet from "helmet";
 import dotenv from 'dotenv';
 import cors from 'cors';
+import passport from 'passport';
 
 import { getRoutes } from './routes';
 
@@ -23,7 +24,8 @@ const main = async () => {
   // router.use(helmet());
   router.use(express.json());
   router.use(express.urlencoded({ extended: true }));
-
+  router.use(passport.initialize()) 
+  
   /** Log the request */
   router.use((req: Request, res: Response, next: NextFunction) => {
     /** Log the req */

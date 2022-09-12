@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import { IVerifyOptions } from 'passport-local';
 
 import passport from '../utils/passport';
+import auth from '../utils/auth';
 import logger from '../utils/logger';
 import { ILocalUserRequest } from '../interceptors/localUserCheck';
 
@@ -13,20 +14,23 @@ export interface UserDetails {
   id: number;
   email: string;
   name: string;
-  inDarkMode: boolean;
-}
-
-interface MulterRequest extends Request {
-  file: any;
 }
 
 export default () => {
   const models = require('../db/models');
-  const { user: User } = models;
+  const { user: User, userGroup } = models;
 
   return {
+    getAllUsers: async (req: Request, res: Response) => {
+      try {
+        const users = await User.findAll({ include: userGroup });
+        res.status(200).json({ message: 'Users retrived.', users });
+      } catch (error) {
+        res.status(500).json({ message: 'Users retrived.', error: error.message });
+      }
+    },
     register: async (req: Request, res: Response) => {
-      const { name, email, password, inDarkMode } = req.body;
+      const { name, email, password, country, userGroupId, isCheckReq, isPasswordUpdated } = req.body;
       try {
         const existing = await User.findOne({ where: { email } });
         if (existing) {
@@ -34,7 +38,7 @@ export default () => {
           return;
         }
         const hash = bcrypt.hashSync(password, bcrypt.genSaltSync(SALT_ROUNDS));
-        const user = await User.create({ name, email, password: hash, inDarkMode });
+        const user = await User.create({ name, email, password: hash, country, userGroupId, isCheckReq, isPasswordUpdated });
         res.status(201).json({ message: 'User created.', user });
       } catch (e: any) {
         logger.error(e.message);
@@ -48,7 +52,10 @@ export default () => {
         else {
           req.logIn(user, (err) => {
             if (err) res.status(500).json({ message: 'Could not create session.' });
-            else res.status(200).json({ user, message: info.message });
+            else {
+              const accessToken = auth.getToken(user);
+              res.status(200).json({ accessToken, message: info.message });
+            }
           });
         }
       })(req, res);
@@ -61,7 +68,7 @@ export default () => {
         res.status(403).json({ message: 'Unauthorized request.' });
       }
     },
-   
+
     updateUser: async (req: ILocalUserRequest, res: Response) => {
       const { userId } = req.params;
       if (req.localUser.id === parseInt(userId)) {

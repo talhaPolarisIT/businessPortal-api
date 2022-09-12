@@ -7,45 +7,37 @@ module.exports = (sequelize) => {
       primaryKey: true,
       autoIncrement: true,
     },
-    auth0Id: {
-      type: Sequelize.STRING,
-      required: true,
-      unique: true,
-    },
     email: {
       type: Sequelize.STRING,
       unique: true,
-      required: true,
     },
     name: {
       type: Sequelize.STRING,
-      required: true,
     },
-    inDarkMode: {
-      type: Sequelize.BOOLEAN,
-      defaultValue: false,
+    password: {
+      type: Sequelize.STRING,
     },
-    emailVerified: {
+    country: {
+      type: Sequelize.STRING,
+    },
+    isActive: {
       type: Sequelize.BOOLEAN,
-      defaultValue: false,
+      defaultValue: true,
+    },
+    isPasswordUpdated: {
+      type: Sequelize.BOOLEAN,
+    },
+    isCheckReq: {
+      type: Sequelize.BOOLEAN,
     },
     verificationCode: {
       type: Sequelize.INTEGER,
     },
-    mobile: {
-      type: Sequelize.STRING,
-    },
-    recoveryEmail: {
-      type: Sequelize.STRING,
-    },
-    image: {
-      type: Sequelize.STRING,
-    },
   });
 
   User.associate = (models) => {
-    User.belongsTo(models.company, { foreignKey: 'companyId' });
-    User.belongsTo(models.role, { foreignKey: 'roleId' });
+    console.log('models: ', models);
+    User.belongsTo(models.userGroup, { foreignKey: 'userGroupId' });
   };
 
   return User;

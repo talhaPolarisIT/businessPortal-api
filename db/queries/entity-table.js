@@ -28,6 +28,12 @@ const _default = () => {
           autoIncrement: true,
         },
         ...tableFields,
+        createdAt: {
+          type: DataTypes.DATE,
+        },
+        updatedAt: {
+          type: DataTypes.DATE,
+        },
       });
     },
     getEntityDataByName: async (tableName) => {
@@ -40,13 +46,16 @@ const _default = () => {
     insertRecord: async (tableName, values) => {
       try {
         let res;
-        queryInterface.insert(null, tableName, values).then((res) => {
-          console.log("res ",res);
-          return res
-        }).catch((error)=>{
-          console.log("error: ", error);
-          return error
-        })
+        queryInterface
+          .insert(null, tableName, values)
+          .then((res) => {
+            console.log('res ', res);
+            return res;
+          })
+          .catch((error) => {
+            console.log('error: ', error);
+            return error;
+          });
         // return res;
       } catch (error) {
         console.log('ERROR IS insertTable() -> tableName ', tableName, values);
