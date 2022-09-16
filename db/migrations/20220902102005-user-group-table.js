@@ -17,12 +17,6 @@ module.exports = {
         required: true,
         unique: true,
       },
-      isAdmin: {
-        type: Sequelize.BOOLEAN,
-      },
-      isPublic: {
-        type: Sequelize.BOOLEAN,
-      },
       isActive: {
         type: Sequelize.BOOLEAN,
       },

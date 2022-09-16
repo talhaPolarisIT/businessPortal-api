@@ -7,12 +7,10 @@ const JwtStrategy = passportjwt.Strategy;
 const ExtractJwt = passportjwt.ExtractJwt;
 const models = require('../db/models');
 
-export const secretKey = '12345-67890-09876-54321';
-
+const { SESSION_SECRET } = process.env;
 const getToken = function (user: any) {
-  return jwt.sign(user, secretKey, { expiresIn: 3600 });
+  return jwt.sign(user, SESSION_SECRET, { expiresIn: 3600 });
 };
-
 
 const verifyUser = passport.authenticate('jwt', { session: false });
 

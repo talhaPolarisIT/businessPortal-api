@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "migrate": "cd db && sequelize db:migrate  && cd ..",
+    "migrate": "cd db && sequelize db:migrate && sequelize db:seed:all && cd ..",
     "start": "npm run migrate && tsc && node dist/index.js | bunyan",
     "dev": "ts-node index.ts | bunyan"
   },

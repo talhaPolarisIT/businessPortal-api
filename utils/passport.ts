@@ -3,12 +3,13 @@ import passportLocal from 'passport-local';
 import bcrypt from 'bcryptjs';
 import { UserDetails } from '../controllers/user';
 import passportjwt from 'passport-jwt';
-import { secretKey } from './auth';
 
 const JwtStrategy = passportjwt.Strategy;
 const ExtractJwt = passportjwt.ExtractJwt;
 
 const models = require('../db/models');
+
+const { SESSION_SECRET } = process.env;
 
 passport.serializeUser<any, any>((req, user, done) => {
   done(undefined, user);
@@ -21,7 +22,7 @@ passport.deserializeUser(async (user: UserDetails, done) => {
 
 var opts = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: secretKey,
+  secretOrKey: SESSION_SECRET,
 };
 
 passport.use(
@@ -34,11 +35,9 @@ passport.use(
     return done(
       null,
       {
-        id: user.id,
-        name: user.name,
-        email: user.email,
+       ...user.dataValues,
       },
-      { message: 'User logged in.' }
+      { message: 'Login successful.' }
     );
   })
 );

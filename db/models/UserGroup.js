@@ -18,12 +18,6 @@ module.exports = (sequelize) => {
         unique: true,
         required: true,
       },
-      isAdmin: {
-        type: Sequelize.BOOLEAN,
-      },
-      isPublic: {
-        type: Sequelize.BOOLEAN,
-      },
       isActive: {
         type: Sequelize.BOOLEAN,
       },

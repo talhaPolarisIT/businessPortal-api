@@ -15,11 +15,16 @@ export const getRoutes = () => {
   const userGroupController = userGroup();
 
   /*Auth */
-  router.post('/user/register', userController.register);
-  router.post('/user/login', userController.login);
+  router.post('/auth/register', userController.register);
+  router.post('/auth/login', userController.login);
+  router.post('/auth/send_verification_code', userController.sendVerificationCode);
+  router.post('/auth/verify_account', userController.verifyAccount);
+  router.post('/auth/rest_password', userController.resetPassword);
+  router.post('/auth/update_password', userController.updatePassword);
 
   /* Users */
-  router.get('/users', userController.getAllUsers);
+  router.get('/user', userController.getAllUsers);
+  router.put('/user/:userId', userController.updateUser);
 
   /*User Group */
   router.get('/usergroup', userGroupController.getUserGroups);
