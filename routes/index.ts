@@ -17,6 +17,7 @@ export const getRoutes = () => {
   /*Auth */
   router.post('/auth/register', userController.register);
   router.post('/auth/login', userController.login);
+  router.get('/auth/validate', auth.verifyUser, userController.validate);
   router.post('/auth/send_verification_code', userController.sendVerificationCode);
   router.post('/auth/verify_account', userController.verifyAccount);
   router.post('/auth/rest_password', userController.resetPassword);
@@ -27,23 +28,23 @@ export const getRoutes = () => {
   router.put('/user/:userId', userController.updateUser);
 
   /*User Group */
-  router.get('/usergroup', userGroupController.getUserGroups);
-  router.post('/usergroup', userGroupController.createUserGroups);
-  router.put('/usergroup/:userGroupId', userGroupController.updateUserGroups);
-  router.delete('/usergroup/:userGroupId', userGroupController.deleteUserGroups);
+  router.get('/usergroup', auth.verifyUser, userGroupController.getUserGroups);
+  router.post('/usergroup', auth.verifyUser, userGroupController.createUserGroups);
+  router.put('/usergroup/:userGroupId', auth.verifyUser, userGroupController.updateUserGroups);
+  router.delete('/usergroup/:userGroupId', auth.verifyUser, userGroupController.deleteUserGroups);
 
   /*Entity */
-  router.post('/entity', entityController.createEntity);
-  router.get('/entity', entityController.getEntities);
-  router.get('/entity/:entityName', entityController.getEntityByName);
-  router.get('/entity/:entityId', entityController.getEntityById);
-  router.put('/entity/:entityName', entityController.updateEntity);
-  router.delete('/entity/:entityId', entityController.deleteEntity);
+  router.post('/entity', auth.verifyUser, localUserCheck, entityController.createEntity);
+  router.get('/entity', auth.verifyUser, localUserCheck, entityController.getEntities);
+  router.get('/entity/:entityName', auth.verifyUser, localUserCheck, entityController.getEntityByName);
+  router.get('/entity/:entityId', auth.verifyUser, localUserCheck, entityController.getEntityById);
+  router.put('/entity/:entityName', auth.verifyUser, localUserCheck, entityController.updateEntity);
+  router.delete('/entity/:entityId', auth.verifyUser, localUserCheck, entityController.deleteEntity);
 
   /*Entity Records */
-  router.post('/entity/:entityName/record', entityController.addRecord);
-  router.put('/entity/:entityName/record/:recordId', entityController.updateRecord);
-  router.delete('/entity/:entityName/record/:recordId', entityController.deleteRecord);
+  router.post('/entity/:entityName/record', auth.verifyUser, localUserCheck, entityController.addRecord);
+  router.put('/entity/:entityName/record/:recordId', auth.verifyUser, localUserCheck, entityController.updateRecord);
+  router.delete('/entity/:entityName/record/:recordId', auth.verifyUser, localUserCheck, entityController.deleteRecord);
 
   return router;
 };

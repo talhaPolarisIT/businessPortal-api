@@ -118,6 +118,14 @@ export default () => {
       } else {
         res.status(403).json({ message: 'Unauthorized request.' });
       }
+    }, validate: async (req: ILocalUserRequest, res: Response) => {
+      if (req.user)
+        res.status(200).json({
+          message: 'Session validated.',
+          user: req.localUser,
+          isAuthenticated: true,
+        });
+      else res.status(403).json({ message: 'Invalid session.' });
     },
     updatePassword: async (req: IUpdatePasswordRequest, res: Response) => {
       try {

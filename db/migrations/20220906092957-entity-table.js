@@ -20,6 +20,24 @@ module.exports = {
       fields: {
         type: Sequelize.JSON,
       },
+      entityPermissionsView: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+      },
+      entityPermissionsNone: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+      },
+      entityPermissionsAdd: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+      },
+      entityPermissionsEdit: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+      },
+      entityPermissionsDelete: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
+      },
+      recordLevelPermission: {
+        type: Sequelize.JSONB,
+      },
       hasSubEntity: {
         type: Sequelize.BOOLEAN,
       },
