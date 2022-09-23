@@ -20,6 +20,9 @@ module.exports = (sequelize) => {
     country: {
       type: Sequelize.STRING,
     },
+    userGroupCodes: {
+      type: Sequelize.ARRAY(Sequelize.INTEGER),
+    },
     isActive: {
       type: Sequelize.BOOLEAN,
       defaultValue: true,
@@ -34,11 +37,6 @@ module.exports = (sequelize) => {
       type: Sequelize.INTEGER,
     },
   });
-
-  User.associate = (models) => {
-    console.log('models: ', models);
-    User.belongsTo(models.userGroup, { foreignKey: 'userGroupId' });
-  };
 
   return User;
 };

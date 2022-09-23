@@ -33,15 +33,8 @@ module.exports = {
       isCheckReq: {
         type: Sequelize.BOOLEAN,
       },
-      userGroupId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'userGroup',
-          key: 'id',
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL',
-        defaultValue: null,
+      userGroupCodes: {
+        type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
       createdAt: {
         type: Sequelize.DATE,

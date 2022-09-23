@@ -42,7 +42,6 @@ export interface IEntity {
   entityPermissionsNone: [];
   entityPermissionsView: [];
   entityPermissionsEdit: [];
-  entityPermissionsDelete: [];
   hasSubEntity: boolean;
   isSubEntity;
   subEntityId;
@@ -97,7 +96,6 @@ export default () => {
         entityPermissionsView,
         entityPermissionsAdd,
         entityPermissionsEdit,
-        entityPermissionsDelete,
         recordLevelPermission,
       } = req.body;
       try {
@@ -114,7 +112,6 @@ export default () => {
           entityPermissionsView,
           entityPermissionsAdd,
           entityPermissionsEdit,
-          entityPermissionsDelete,
           linkedEntity,
           description,
           isDisplayonMenu,
@@ -130,17 +127,17 @@ export default () => {
       }
     },
     getEntities: async (req: ILocalUserRequest, res: Response) => {
+      console.log('req.localUser.userGroupCodes', req.localUser.userGroupCodes);
+
       try {
         const entities = await Entity.findAll({
           where: {
-            [Op.and]: {
+            [Op.or]: {
               entityPermissionsView: {
-                [Op.overlap]: [req.localUser.userGroup.code],
+                [Op.overlap]: req.localUser.userGroupCodes,
               },
-              [Op.not]: {
-                entityPermissionsNone: {
-                  [Op.overlap]: [req.localUser.userGroup.code],
-                },
+              entityPermissionsEdit: {
+                [Op.overlap]: req.localUser.userGroupCodes,
               },
             },
           },
@@ -203,14 +200,12 @@ export default () => {
             {
               where: {
                 id,
-                [Op.and]: {
+                [Op.or]: {
                   entityPermissionsView: {
-                    [Op.overlap]: [parseInt('1')],
+                    [Op.overlap]: req.localUser.userGroupCodes,
                   },
-                  [Op.not]: {
-                    entityPermissionsNone: {
-                      [Op.overlap]: [parseInt('1')],
-                    },
+                  entityPermissionsEdit: {
+                    [Op.overlap]: req.localUser.userGroupCodes,
                   },
                 },
               },

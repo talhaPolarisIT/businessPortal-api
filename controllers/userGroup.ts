@@ -2,12 +2,12 @@ import { Request, Response } from 'express';
 
 export default () => {
   const models = require('../db/models');
-  const { userGroup: UserGroupModel, user: UserModel } = models;
+  const { userGroup: UserGroupModel } = models;
 
   return {
     getUserGroups: async (req: Request, res: Response) => {
       try {
-        const userGroups = await UserGroupModel.findAll({ include: UserModel });
+        const userGroups = await UserGroupModel.findAll();
         res.status(200).json({ message: 'getUserGroups', userGroups });
       } catch (error: any) {
         res.status(500).json({ message: 'Server Error', error: error.message });

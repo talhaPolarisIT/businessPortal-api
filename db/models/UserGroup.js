@@ -31,9 +31,5 @@ module.exports = (sequelize) => {
     { tableName: 'userGroup' }
   );
 
-  userGroup.associate = (models) => {
-    userGroup.hasMany(models.user);
-  };
-
   return userGroup;
 };
