@@ -38,10 +38,10 @@ export interface IEntity {
   fields: IFeilds;
   isDisplayonMenu: boolean;
   isPublish: boolean;
-  entityPermissionsAdd: [];
+  entityPermissionsCreate: [];
   entityPermissionsNone: [];
-  entityPermissionsView: [];
-  entityPermissionsEdit: [];
+  entityPermissionsRead: [];
+  entityPermissionsDelete: [];
   hasSubEntity: boolean;
   isSubEntity;
   subEntityId;
@@ -49,7 +49,7 @@ export interface IEntity {
   isLinkedEntity;
   linkedEntity;
   createdBy;
-  companyId;
+
   recordLevelPermission: IRecordLevelPermission;
 }
 
@@ -91,11 +91,11 @@ export default () => {
         isLinkedEntity,
         linkedEntity,
         createdBy,
-        companyId,
+
         entityPermissionsNone,
-        entityPermissionsView,
-        entityPermissionsAdd,
-        entityPermissionsEdit,
+        entityPermissionsRead,
+        entityPermissionsCreate,
+        entityPermissionsDelete,
         recordLevelPermission,
       } = req.body;
       try {
@@ -109,15 +109,15 @@ export default () => {
           superEntityId,
           isLinkedEntity,
           entityPermissionsNone,
-          entityPermissionsView,
-          entityPermissionsAdd,
-          entityPermissionsEdit,
+          entityPermissionsRead,
+          entityPermissionsCreate,
+          entityPermissionsDelete,
           linkedEntity,
           description,
           isDisplayonMenu,
           isPublish,
           createdBy,
-          companyId,
+
           recordLevelPermission,
         });
         entityQueryInterface.createTable(databaseName, fields);
@@ -127,16 +127,17 @@ export default () => {
       }
     },
     getEntities: async (req: ILocalUserRequest, res: Response) => {
-      console.log('req.localUser.userGroupCodes', req.localUser.userGroupCodes);
-
       try {
         const entities = await Entity.findAll({
           where: {
             [Op.or]: {
-              entityPermissionsView: {
+              entityPermissionsRead: {
                 [Op.overlap]: req.localUser.userGroupCodes,
               },
-              entityPermissionsEdit: {
+              entityPermissionsCreate: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+              entityPermissionsDelete: {
                 [Op.overlap]: req.localUser.userGroupCodes,
               },
             },
@@ -174,40 +175,33 @@ export default () => {
     updateEntity: async (req: ILocalUserRequest, res: Response) => {
       const { entityName } = req.params;
       const { entity } = req.body;
-      const {
-        id,
-        name,
-        fields,
-        databaseName,
-        isDisplayonMenu,
-        isPublish,
-        hasSubEntity,
-        isSubEntity,
-        subEntityId,
-        superEntityId,
-        isLinkedEntity,
-        linkedEntity,
-        createdBy,
-        companyId,
-        entityPermissions,
-      } = entity;
+      console.log('entity: ', entity);
+
+      const { id, name, fields, databaseName, isDisplayonMenu, isPublish, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, entityPermissions } = entity;
       try {
-        const entity = await Entity.findOne({ where: { id } });
+        const entity = await Entity.findOne({
+          where: {
+            id,
+            [Op.or]: {
+              entityPermissionsCreate: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+              entityPermissionsDelete: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+            },
+          },
+        });
+
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
+          console.log('update entity.name: ', entity.name);
+
           const update = await Entity.update(
-            { name, fields, databaseName, hasSubEntity, isDisplayonMenu, isPublish, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId, entityPermissions },
+            { name, fields, databaseName, hasSubEntity, isDisplayonMenu, isPublish, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, entityPermissions },
             {
               where: {
                 id,
-                [Op.or]: {
-                  entityPermissionsView: {
-                    [Op.overlap]: req.localUser.userGroupCodes,
-                  },
-                  entityPermissionsEdit: {
-                    [Op.overlap]: req.localUser.userGroupCodes,
-                  },
-                },
               },
             }
           );
@@ -227,12 +221,12 @@ export default () => {
     },
     // addValuesToEntity: async (req: ILocalUserRequest, res: Response) => {
     //   const { entityId: id } = req.params;
-    //   const { name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId } = req.body;
+    //   const { name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, } = req.body;
     //   try {
     //     const entity = await Entity.findOne({ where: { id } });
     //     if (!entity) res.status(404).json({ message: `Entity Not Found` });
     //     else {
-    //       const update = await Entity.update({ name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, companyId }, { where: { id } });
+    //       const update = await Entity.update({ name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, }, { where: { id } });
     //       res.status(200).json({ message: `Entity ${id} Updated`, update });
     //     }
     //   } catch (error) {
@@ -242,7 +236,14 @@ export default () => {
     deleteEntity: async (req: ILocalUserRequest, res: Response) => {
       const { entityId: id } = req.params;
       try {
-        const entity = await Entity.findOne({ where: { id } });
+        const entity = await Entity.findOne({
+          where: {
+            id,
+            entityPermissionsDelete: {
+              [Op.overlap]: req.localUser.userGroupCodes,
+            },
+          },
+        });
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
           const deleted = await Entity.destroy({ where: { id } });

@@ -6,6 +6,7 @@ import user from '../controllers/user';
 import entity from '../controllers/entity';
 import userGroup from '../controllers/userGroup';
 import auth from '../utils/auth';
+import systemAdminCheck from '../interceptors/systemAdminCheck';
 
 export const getRoutes = () => {
   const router = express();
@@ -34,7 +35,7 @@ export const getRoutes = () => {
   router.delete('/usergroup/:userGroupId', auth.verifyUser, userGroupController.deleteUserGroups);
 
   /*Entity */
-  router.post('/entity', auth.verifyUser, localUserCheck, entityController.createEntity);
+  router.post('/entity', auth.verifyUser, localUserCheck, systemAdminCheck, entityController.createEntity);
   router.get('/entity', auth.verifyUser, localUserCheck, entityController.getEntities);
   router.get('/entity/:entityName', auth.verifyUser, localUserCheck, entityController.getEntityByName);
   router.get('/entity/:entityId', auth.verifyUser, localUserCheck, entityController.getEntityById);

@@ -21,16 +21,13 @@ module.exports = (sequelize) => {
       fields: {
         type: Sequelize.JSON,
       },
-      entityPermissionsView: {
+      entityPermissionsCreate: {
         type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
       entityPermissionsNone: {
         type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
-      entityPermissionsAdd: {
-        type: Sequelize.ARRAY(Sequelize.INTEGER),
-      },
-      entityPermissionsEdit: {
+      entityPermissionsRead: {
         type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
       entityPermissionsDelete: {

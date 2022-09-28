@@ -20,16 +20,13 @@ module.exports = {
       fields: {
         type: Sequelize.JSON,
       },
-      entityPermissionsView: {
+      entityPermissionsRead: {
         type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
       entityPermissionsNone: {
         type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
-      entityPermissionsAdd: {
-        type: Sequelize.ARRAY(Sequelize.INTEGER),
-      },
-      entityPermissionsEdit: {
+      entityPermissionsCreate: {
         type: Sequelize.ARRAY(Sequelize.INTEGER),
       },
       entityPermissionsDelete: {
@@ -63,9 +60,6 @@ module.exports = {
         type: Sequelize.JSONB,
       },
       createdBy: {
-        type: Sequelize.INTEGER,
-      },
-      companyId: {
         type: Sequelize.INTEGER,
       },
       createdAt: {
