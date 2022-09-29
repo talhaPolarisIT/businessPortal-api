@@ -177,7 +177,25 @@ export default () => {
       const { entity } = req.body;
       console.log('entity: ', entity);
 
-      const { id, name, fields, databaseName, isDisplayonMenu, isPublish, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, entityPermissions } = entity;
+      const {
+        id,
+        name,
+        fields,
+        databaseName,
+        isDisplayonMenu,
+        isPublish,
+        hasSubEntity,
+        isSubEntity,
+        subEntityId,
+        superEntityId,
+        isLinkedEntity,
+        linkedEntity,
+        createdBy,
+        entityPermissionsNone,
+        entityPermissionsRead,
+        entityPermissionsCreate,
+        entityPermissionsDelete,
+      } = entity;
       try {
         const entity = await Entity.findOne({
           where: {
@@ -198,7 +216,24 @@ export default () => {
           console.log('update entity.name: ', entity.name);
 
           const update = await Entity.update(
-            { name, fields, databaseName, hasSubEntity, isDisplayonMenu, isPublish, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, entityPermissions },
+            {
+              name,
+              fields,
+              databaseName,
+              hasSubEntity,
+              isDisplayonMenu,
+              isPublish,
+              isSubEntity,
+              subEntityId,
+              superEntityId,
+              isLinkedEntity,
+              linkedEntity,
+              createdBy,
+              entityPermissionsNone,
+              entityPermissionsRead,
+              entityPermissionsCreate,
+              entityPermissionsDelete,
+            },
             {
               where: {
                 id,
