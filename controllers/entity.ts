@@ -161,12 +161,12 @@ export default () => {
     },
     getEntityByName: async (req: ILocalUserRequest, res: Response) => {
       const { entityName } = req.params;
-      const { code: userGroupCode } = req.localUser.userGroup;
+      // const { code: userGroupCode } = req.localUser.userGroup;
       try {
         const entity = await Entity.findOne({ where: { databaseName: entityName } });
         if (!entity) return res.status(404).json({ message: `Entity not fount` });
 
-        const tableData = await entityQueryInterface.getEntityDataByName(entityName, entity.fields, entity.recordLevelPermission, userGroupCode);
+        const tableData = await entityQueryInterface.getEntityDataByName(entityName, entity.fields, entity.recordLevelPermission, 1);
         res.status(200).json({ message: `Entity ${entityName}`, entity: [...tableData] });
       } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -292,18 +292,35 @@ export default () => {
       const { entityName } = req.params;
       const values = req.body;
       try {
-        const insertData = await entityQueryInterface.insertRecord(entityName, values);
+        const entity = await Entity.findOne({
+          where: {
+            databaseName: entityName,
+            [Op.or]: {
+              entityPermissionsCreate: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+              entityPermissionsDelete: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+            },
+          },
+        });
 
-        // const insertData = entity_470732.create({ field_995954, field_502573, field_658322, field_396853 });
-        // const tableData = await entityQueryInterface.getEntityDataByName(entityName);
-        console.log('insertData: ', insertData);
-        res.status(200).json({ message: 'Record Add', insertData });
+        if (!entity) res.status(404).json({ message: `Entity Not Found` });
+        else {
+          console.log('update entity.name: ', entity.name);
+          const insertData = await entityQueryInterface.insertRecord(entityName, values);
+          // const insertData = entity_470732.create({ field_995954, field_502573, field_658322, field_396853 });
+          // const tableData = await entityQueryInterface.getEntityDataByName(entityName);
+          console.log('insertData: ', insertData);
+          res.status(200).json({ message: 'Record Add', insertData });
 
-        // if (insertData) {
-        //   res.status(200).json({ message: 'Record Add', insertData });
-        // } else {
-        //   res.status(500).json({ message: 'Server Error' });
-        // }
+          // if (insertData) {
+          //   res.status(200).json({ message: 'Record Add', insertData });
+          // } else {
+          //   res.status(500).json({ message: 'Server Error' });
+          // }
+        }
       } catch (error: any) {
         res.status(500).json({ message: 'Server Error' });
       }

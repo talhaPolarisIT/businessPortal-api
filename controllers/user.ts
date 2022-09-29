@@ -53,7 +53,7 @@ export default () => {
   return {
     getAllUsers: async (req: Request, res: Response) => {
       try {
-        const users = await User.findAll();
+        const users = await User.findAll({ order: [['id', 'ASC']] });
         res.status(200).json({ message: 'Users retrived.', users });
       } catch (error) {
         res.status(500).json({ message: 'Users retrived.', error: error.message });
@@ -103,12 +103,8 @@ export default () => {
       const { userId } = req.params;
       if (parseInt(userId)) {
         try {
-          if (req.body.password) {
-            const hash = bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(SALT_ROUNDS));
-            req.body.password = hash;
-          }
-          const { name, password, email, isActive, isPasswordUpdated, isCheckReq, verificationCode } = req.body;
-          await User.update({ name, password, email, isActive, isPasswordUpdated, isCheckReq, verificationCode }, { where: { id: userId } });
+          const { name, isActive, country, isCheckReq, userGroupCodes } = req.body;
+          await User.update({ name, isActive, country, isCheckReq, userGroupCodes }, { where: { id: userId } });
           const user = await User.findOne({ where: { id: userId } });
           res.status(200).json({ message: 'User updated.', user });
         } catch (e: any) {

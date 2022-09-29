@@ -38,21 +38,23 @@ const _default = () => {
     },
     getEntityDataByName: async (tableName, fields, recordLevelPermission, userGroupCode) => {
       const fieldsArr = [];
-      Object.entries(fields).forEach((f, index) => {
-        const [fieldName, field] = f;
-        if (field.fieldsPermissionsFull || field.fieldsPermissionsView) {
-          if (field.fieldsPermissionsFull.includes(userGroupCode) || field.fieldsPermissionsView.includes(userGroupCode)) fieldsArr.push(fieldName);
-        }
-      });
-      const recordViewPermissions= recordLevelPermission[userGroupCode].view
-      const filterArr = '' 
-      if (recordViewPermissions){
-        recordViewPermissions.forEach((filter)=>{
-          filterArr = filterArr + `where ${filter.field} ${filter.condition} ${filter.value}`
-        })
-       }
+      // Object.entries(fields).forEach((f, index) => {
+      //   const [fieldName, field] = f;
+      //   if (field.fieldsPermissionsFull || field.fieldsPermissionsView) {
+      //     if (field.fieldsPermissionsFull.includes(userGroupCode) || field.fieldsPermissionsView.includes(userGroupCode)) fieldsArr.push(fieldName);
+      //   }
+      // });
+      // const recordViewPermissions= recordLevelPermission[userGroupCode].view
+      // const filterArr = '' 
+      // if (recordViewPermissions){
+      //   recordViewPermissions.forEach((filter)=>{
+      //     filterArr = filterArr + `where ${filter.field} ${filter.condition} ${filter.value}`
+      //   })
+      //  }
       try {
-        return await queryInterface.sequelize.query(`Select ${fieldsArr.length > 0 ? fieldsArr.join(', ') : '*'} from ${tableName} ${filterArr} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        // return await queryInterface.sequelize.query(`Select ${fieldsArr.length > 0 ? fieldsArr.join(', ') : '*'} from ${tableName} ${filterArr} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        return await queryInterface.sequelize.query(`Select * from ${tableName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+      
       } catch (error) {
         console.log('ERROR IS getTable() -> tableName ', tableName , error);
       }
