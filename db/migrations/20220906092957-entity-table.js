@@ -62,6 +62,10 @@ module.exports = {
       createdBy: {
         type: Sequelize.INTEGER,
       },
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        default: false,
+      },
       createdAt: {
         type: Sequelize.DATE,
       },

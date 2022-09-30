@@ -141,6 +141,9 @@ export default () => {
                 [Op.overlap]: req.localUser.userGroupCodes,
               },
             },
+            [Op.and]: {
+              isDeleted: false,
+            },
           },
           order: [['id', 'ASC']],
         });
@@ -281,7 +284,7 @@ export default () => {
         });
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
-          const deleted = await Entity.destroy({ where: { id } });
+          const deleted = await Entity.update({ isDeleted: true }, { where: { id } });
           res.status(200).json({ message: `Entity ${id} Deleted` });
         }
       } catch (error) {

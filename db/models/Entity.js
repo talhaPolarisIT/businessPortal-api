@@ -63,6 +63,10 @@ module.exports = (sequelize) => {
       linkedEntity: {
         type: Sequelize.JSONB,
       },
+      isDeleted: {
+        type: Sequelize.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       tableName: 'entities',
