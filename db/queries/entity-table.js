@@ -1,3 +1,5 @@
+import { DATA_TYPES } from '../../constants';
+
 const _default = () => {
   const db = require('../models/index');
   // console.log("db: ",db)
@@ -18,8 +20,9 @@ const _default = () => {
   return {
     createTable: async (tableName, fields) => {
       const tableFields = {};
-      Object.keys(fields).map((fieldName) => {
-        tableFields = { [fieldName]: DataTypes.STRING, ...tableFields };
+      Object.entries(fields).map((field) => {
+        const [fieldName, fieldData] = field;
+        tableFields = { [fieldName]: DATA_TYPES[fieldData.dataType], ...tableFields };
       });
       await queryInterface.createTable(tableName, {
         id: {
@@ -45,7 +48,7 @@ const _default = () => {
       //   }
       // });
       // const recordViewPermissions= recordLevelPermission[userGroupCode].view
-      // const filterArr = '' 
+      // const filterArr = ''
       // if (recordViewPermissions){
       //   recordViewPermissions.forEach((filter)=>{
       //     filterArr = filterArr + `where ${filter.field} ${filter.condition} ${filter.value}`
@@ -54,9 +57,8 @@ const _default = () => {
       try {
         // return await queryInterface.sequelize.query(`Select ${fieldsArr.length > 0 ? fieldsArr.join(', ') : '*'} from ${tableName} ${filterArr} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
         return await queryInterface.sequelize.query(`Select * from ${tableName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
-      
       } catch (error) {
-        console.log('ERROR IS getTable() -> tableName ', tableName , error);
+        console.log('ERROR IS getTable() -> tableName ', tableName, error);
       }
     },
     insertRecord: async (tableName, values) => {
