@@ -22,8 +22,9 @@ const _default = () => {
       const tableFields = {};
       Object.entries(fields).map((field) => {
         const [fieldName, fieldData] = field;
-        tableFields = { [fieldName]: DATA_TYPES[fieldData.dataType], ...tableFields };
+        tableFields = { [fieldName]: {type: DATA_TYPES[fieldData.dataType]}, ...tableFields };
       });
+      console.log("...tableFields: ", tableFields);
       await queryInterface.createTable(tableName, {
         id: {
           type: DataTypes.INTEGER,
@@ -39,8 +40,19 @@ const _default = () => {
         },
       });
     },
-    getEntityDataByName: async (tableName, fields, recordLevelPermission, userGroupCode) => {
+    getEntityDataByName: async (entity, userGroupCodes) => {
       const fieldsArr = [];
+      Object.entries(entity.fields).forEach((f) => {
+        if (
+          userGroupCodes.some((ug) => {
+            return f[1].fieldsPermissionsFull.includes(ug) || f[1].fieldsPermissionsEdit.includes(ug);
+          })
+        ){
+          fieldsArr.push(f[0]);
+        }
+
+      });
+
       // Object.entries(fields).forEach((f, index) => {
       //   const [fieldName, field] = f;
       //   if (field.fieldsPermissionsFull || field.fieldsPermissionsView) {
@@ -53,12 +65,22 @@ const _default = () => {
       //   recordViewPermissions.forEach((filter)=>{
       //     filterArr = filterArr + `where ${filter.field} ${filter.condition} ${filter.value}`
       //   })
-      //  }
+      // const userGroupsCode = [1,2]
+      // const obj = Object.entries(entity.fields).map((f)=>{
+      //   console.log( f[1].fieldsPermissionsFull)
+
+      //   if(userGroupsCode.some((ug)=>{
+
+      //     return f[1].fieldsPermissionsFull.includes(ug) || f[1].fieldsPermissionsEdit.includes(ug)
+      //     }))
+      //   return f[0]
+      // });
+      //  } field_54242 field_96372 entity_18328
       try {
         // return await queryInterface.sequelize.query(`Select ${fieldsArr.length > 0 ? fieldsArr.join(', ') : '*'} from ${tableName} ${filterArr} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
-        return await queryInterface.sequelize.query(`Select * from ${tableName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        return await queryInterface.sequelize.query(`Select ${fieldsArr.join(' ,')}  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
       } catch (error) {
-        console.log('ERROR IS getTable() -> tableName ', tableName, error);
+        console.log('ERROR IS getTable() -> tableName ', entity.name, error);
       }
     },
     insertRecord: async (tableName, values) => {

@@ -164,12 +164,11 @@ export default () => {
     },
     getEntityByName: async (req: ILocalUserRequest, res: Response) => {
       const { entityName } = req.params;
-      // const { code: userGroupCode } = req.localUser.userGroup;
+      const userGroupCodse = req.localUser.userGroupCodes;
       try {
         const entity = await Entity.findOne({ where: { databaseName: entityName } });
         if (!entity) return res.status(404).json({ message: `Entity not fount` });
-
-        const tableData = await entityQueryInterface.getEntityDataByName(entityName, entity.fields, entity.recordLevelPermission, 1);
+        const tableData = await entityQueryInterface.getEntityDataByName(entity, userGroupCodse);
         res.status(200).json({ message: `Entity ${entityName}`, entity: [...tableData] });
       } catch (error) {
         res.status(500).json({ message: 'Server Error' });
