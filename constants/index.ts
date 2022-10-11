@@ -11,13 +11,13 @@ export const DATA_TYPES = {
   Section: DataTypes.STRING,
   'Text Single Line': DataTypes.STRING,
   'Text Multi Line': DataTypes.STRING,
-  'Auto Number': DataTypes.INTEGER,
+  'Auto Number': DataTypes.STRING,
   Currency: DataTypes.INTEGER,
   Progress: DataTypes.INTEGER,
   Number: DataTypes.INTEGER,
   Date: DataTypes.DATE,
+  'Yes/No': DataTypes.ENUM('', 'Yes', 'No'),
 };
-
 
 export const DATA_TYPESX = [
   { value: 'Auto Number', label: 'Auto Number' },

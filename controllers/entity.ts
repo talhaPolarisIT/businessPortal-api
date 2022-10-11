@@ -120,7 +120,7 @@ export default () => {
 
           recordLevelPermission,
         });
-        entityQueryInterface.createTable(databaseName, fields);
+        await entityQueryInterface.createTable(databaseName, fields);
         res.status(201).json({ message: 'Entity Created', entity: createEntity });
       } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -169,6 +169,7 @@ export default () => {
         const entity = await Entity.findOne({ where: { databaseName: entityName } });
         if (!entity) return res.status(404).json({ message: `Entity not fount` });
         const tableData = await entityQueryInterface.getEntityDataByName(entity, userGroupCodse);
+
         res.status(200).json({ message: `Entity ${entityName}`, entity: [...tableData] });
       } catch (error) {
         res.status(500).json({ message: 'Server Error' });
@@ -256,20 +257,6 @@ export default () => {
         res.status(500).json({ message: 'Server Error' });
       }
     },
-    // addValuesToEntity: async (req: ILocalUserRequest, res: Response) => {
-    //   const { entityId: id } = req.params;
-    //   const { name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, } = req.body;
-    //   try {
-    //     const entity = await Entity.findOne({ where: { id } });
-    //     if (!entity) res.status(404).json({ message: `Entity Not Found` });
-    //     else {
-    //       const update = await Entity.update({ name, fields, hasSubEntity, isSubEntity, subEntityId, superEntityId, isLinkedEntity, linkedEntity, createdBy, }, { where: { id } });
-    //       res.status(200).json({ message: `Entity ${id} Updated`, update });
-    //     }
-    //   } catch (error) {
-    //     res.status(500).json({ message: 'Server Error' });
-    //   }
-    // },
     deleteEntity: async (req: ILocalUserRequest, res: Response) => {
       const { entityId: id } = req.params;
       try {
@@ -310,21 +297,13 @@ export default () => {
 
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
-          console.log('update entity.name: ', entity.name);
-          const insertData = await entityQueryInterface.insertRecord(entityName, values);
-          // const insertData = entity_470732.create({ field_995954, field_502573, field_658322, field_396853 });
-          // const tableData = await entityQueryInterface.getEntityDataByName(entityName);
+          console.log('insert data entity.name: ', entity.name);
+          const insertData = await entityQueryInterface.insertRecord(entity, values);
           console.log('insertData: ', insertData);
           res.status(200).json({ message: 'Record Add', insertData });
-
-          // if (insertData) {
-          //   res.status(200).json({ message: 'Record Add', insertData });
-          // } else {
-          //   res.status(500).json({ message: 'Server Error' });
-          // }
         }
       } catch (error: any) {
-        res.status(500).json({ message: 'Server Error' });
+        res.status(500).json({ message: 'Server Error', error });
       }
     },
     updateRecord: async (req: ILocalUserRequest, res: Response) => {

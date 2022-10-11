@@ -1,4 +1,6 @@
+import e from 'express';
 import { DATA_TYPES } from '../../constants';
+import { validateEmail } from '../../utils/validate';
 
 const _default = () => {
   const db = require('../models/index');
@@ -20,11 +22,23 @@ const _default = () => {
   return {
     createTable: async (tableName, fields) => {
       const tableFields = {};
+      console.log('...tableName: ', tableName);
+
       Object.entries(fields).map((field) => {
         const [fieldName, fieldData] = field;
-        tableFields = { [fieldName]: {type: DATA_TYPES[fieldData.dataType]}, ...tableFields };
+        let feildSetting = {
+          type: DATA_TYPES[fieldData.dataType],
+        };
+        switch (fieldData.dataType) {
+          case 'Yes/No':
+            break;
+
+          default:
+            break;
+        }
+        tableFields = { [fieldName]: { ...feildSetting }, ...tableFields };
       });
-      console.log("...tableFields: ", tableFields);
+      console.log('...tableFields: ', tableFields);
       await queryInterface.createTable(tableName, {
         id: {
           type: DataTypes.INTEGER,
@@ -47,57 +61,84 @@ const _default = () => {
           userGroupCodes.some((ug) => {
             return f[1].fieldsPermissionsFull.includes(ug) || f[1].fieldsPermissionsEdit.includes(ug);
           })
-        ){
+        ) {
           fieldsArr.push(f[0]);
         }
-
       });
-
-      // Object.entries(fields).forEach((f, index) => {
-      //   const [fieldName, field] = f;
-      //   if (field.fieldsPermissionsFull || field.fieldsPermissionsView) {
-      //     if (field.fieldsPermissionsFull.includes(userGroupCode) || field.fieldsPermissionsView.includes(userGroupCode)) fieldsArr.push(fieldName);
-      //   }
-      // });
-      // const recordViewPermissions= recordLevelPermission[userGroupCode].view
-      // const filterArr = ''
-      // if (recordViewPermissions){
-      //   recordViewPermissions.forEach((filter)=>{
-      //     filterArr = filterArr + `where ${filter.field} ${filter.condition} ${filter.value}`
-      //   })
-      // const userGroupsCode = [1,2]
-      // const obj = Object.entries(entity.fields).map((f)=>{
-      //   console.log( f[1].fieldsPermissionsFull)
-
-      //   if(userGroupsCode.some((ug)=>{
-
-      //     return f[1].fieldsPermissionsFull.includes(ug) || f[1].fieldsPermissionsEdit.includes(ug)
-      //     }))
-      //   return f[0]
-      // });
-      //  } field_54242 field_96372 entity_18328
       try {
-        // return await queryInterface.sequelize.query(`Select ${fieldsArr.length > 0 ? fieldsArr.join(', ') : '*'} from ${tableName} ${filterArr} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
-        return await queryInterface.sequelize.query(`Select ${fieldsArr.join(' ,')}  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        // return await queryInterface.sequelize.query(`Select ${fieldsArr.join(' ,')}  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        return await queryInterface.sequelize.query(`Select *  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
       } catch (error) {
         console.log('ERROR IS getTable() -> tableName ', entity.name, error);
       }
     },
-    insertRecord: async (tableName, values) => {
+    insertRecord: async (entity, values) => {
       try {
-        let res;
-        queryInterface
-          .insert(null, tableName, values)
-          .then((res) => {
-            console.log('res ', res);
-            return res;
-          })
-          .catch((error) => {
-            console.log('error: ', error);
-            return error;
-          });
-        // return res;
-      } catch (error) {
+        let error = { isError: false, message: '' };
+        let lastRow = await queryInterface.sequelize.query(`SELECT * FROM  ${entity.databaseName} ORDER BY ID DESC LIMIT 1`, { type: QueryTypes.SELECT });
+
+        Object.entries(entity.fields).map((field) => {
+          const [fieldName, fieldData] = field;
+          console.log('fieldName: ', fieldName);
+          switch (fieldData.dataType) {
+            case 'Auto Number':
+              let currentValue = 0;
+              if (lastRow && lastRow.length > 0) {
+                if (lastRow[0][fieldName]) {
+                  const dataRow = lastRow[0][fieldName].split('-');
+                  currentValue = dataRow[dataRow.length - 1];
+                } else {
+                  error.message = 'Not found';
+                  error.isError = true;
+                  return;
+                }
+              }
+              let finalValue = [];
+              if (fieldData.settings.prefix) {
+                finalValue.push(fieldData.settings.prefix);
+              }
+              if (fieldData.settings.prefixCol && fieldData.settings.prefixCol !== '') {
+                console.log('fieldData.settings.prefixCol: ', fieldData.settings.prefixCol);
+                finalValue.push(values[fieldData.settings.prefixCol]);
+              }
+              if (fieldData.settings.digits) {
+                const currentValNum = parseInt(currentValue) + 1;
+                const currentValStr = currentValNum.toString();
+                if (currentValStr.length <= parseInt(fieldData.settings.digits)) {
+                  currentValue = String(currentValNum).padStart(fieldData.settings.digits, '0');
+                } else {
+                  error.message = 'Max Number exceeded';
+                  error.isError = true;
+                  return;
+                }
+              } else {
+                currentValue = currentValue + 1;
+              }
+              finalValue.push(currentValue.toString());
+              console.log('finalValue: ', finalValue);
+
+              values[fieldName] = finalValue.join('-');
+              break;
+
+            case 'Email':
+              if (!validateEmail(values[fieldName])) {
+                error.message = `Not A valid Email ${values[fieldName]}`;
+                error.isError = true;
+              }
+              break;
+            default:
+              break;
+          }
+        });
+
+        if (!error.isError) {
+          values.createdAt = new Date();
+          values.updatedAt = new Date();
+          return await queryInterface.insert(null, entity.databaseName, values);
+        } else {
+          return new Error(error.message);
+        }
+      } catch (e) {
         console.log('ERROR IS insertTable() -> tableName ', tableName, values);
       }
     },
