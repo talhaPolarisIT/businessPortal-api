@@ -169,6 +169,7 @@ export default () => {
         const entity = await Entity.findOne({ where: { databaseName: entityName } });
         if (!entity) return res.status(404).json({ message: `Entity not fount` });
         const tableData = await entityQueryInterface.getEntityDataByName(entity, userGroupCodse);
+        console.log('tableData: ', tableData);
 
         res.status(200).json({ message: `Entity ${entityName}`, entity: [...tableData] });
       } catch (error) {

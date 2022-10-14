@@ -55,26 +55,33 @@ const _default = () => {
       });
     },
     getEntityDataByName: async (entity, userGroupCodes) => {
-      const fieldsArr = [];
-      Object.entries(entity.fields).forEach((f) => {
-        if (
-          userGroupCodes.some((ug) => {
-            return f[1].fieldsPermissionsFull.includes(ug) || f[1].fieldsPermissionsEdit.includes(ug);
-          })
-        ) {
-          fieldsArr.push(f[0]);
-        }
-      });
+      console.log('entity: ', entity.databaseName);
+      // const fieldsArr = [];
+      // Object.entries(entity.fields).forEach((f) => {
+      //   if (
+      //     userGroupCodes.some((ug) => {
+      //       return f[1].fieldsPermissionsFull.includes(ug) || f[1].fieldsPermissionsEdit.includes(ug);
+      //     })
+      //   ) {
+      //     fieldsArr.push(f[0]);
+      //   }
+      // });
       try {
         // return await queryInterface.sequelize.query(`Select ${fieldsArr.join(' ,')}  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
-        return await queryInterface.sequelize.query(`Select *  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        const test = await queryInterface.sequelize.query(`Select *  from ${entity.databaseName} ORDER BY id ASC;`, { type: QueryTypes.SELECT });
+        return test;
       } catch (error) {
         console.log('ERROR IS getTable() -> tableName ', entity.name, error);
       }
     },
     insertRecord: async (entity, values) => {
       try {
+        // values.createdAt = new Date();
+        // values.updatedAt = new Date();
+        // return await queryInterface.insert(null, entity.databaseName, values);
+
         let error = { isError: false, message: '' };
+
         let lastRow = await queryInterface.sequelize.query(`SELECT * FROM  ${entity.databaseName} ORDER BY ID DESC LIMIT 1`, { type: QueryTypes.SELECT });
 
         Object.entries(entity.fields).map((field) => {
