@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 import localUserCheck from '../interceptors/localUserCheck';
 import Passport from 'passport';
+import multer from 'multer';
 
 import user from '../controllers/user';
 import entity from '../controllers/entity';
@@ -10,6 +11,7 @@ import systemAdminCheck from '../interceptors/systemAdminCheck';
 
 export const getRoutes = () => {
   const router = express();
+  const upload = multer({});
 
   const userController = user();
   const entityController = entity();
@@ -43,7 +45,7 @@ export const getRoutes = () => {
   router.delete('/entity/:entityId', auth.verifyUser, localUserCheck, entityController.deleteEntity);
 
   /*Entity Records */
-  router.post('/entity/:entityName/record', auth.verifyUser, localUserCheck, entityController.addRecord);
+  router.post('/entity/:entityName/record', upload.array('files[]', 12), auth.verifyUser, localUserCheck, entityController.addRecord);
   router.put('/entity/:entityName/record/:recordId', auth.verifyUser, localUserCheck, entityController.updateRecord);
   router.delete('/entity/:entityName/record/:recordId', auth.verifyUser, localUserCheck, entityController.deleteRecord);
 

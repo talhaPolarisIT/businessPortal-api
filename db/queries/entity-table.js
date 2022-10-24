@@ -1,7 +1,9 @@
 import e from 'express';
 import { DATA_TYPES } from '../../constants';
 import { validateEmail } from '../../utils/validate';
+import moment from 'moment';
 
+const dateFormat = 'DD.MM.YYYY';
 const _default = () => {
   const db = require('../models/index');
   // console.log("db: ",db)
@@ -124,6 +126,16 @@ const _default = () => {
                 error.isError = true;
               }
               break;
+            case 'Date':
+              if (!moment(values[fieldName], dateFormat).isValid()) {
+                error.message = `Not A valid Date ${values[fieldName]}`;
+                error.isError = true;
+                console.log('invalid date');
+              } else {
+                console.log('valid date. ,', moment(values[fieldName]).format(dateFormat));
+
+                values[fieldName] = moment(values[fieldName], dateFormat);
+              }
             default:
               break;
           }
