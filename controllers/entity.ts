@@ -71,7 +71,7 @@ export interface IEntityCreateRequest extends ILocalUserRequest {
   body: IEntity;
 }
 
-interface MulterRequest extends Request {
+interface MulterRequest extends ILocalUserRequest {
   files: any;
 }
 
@@ -282,14 +282,13 @@ export default () => {
         res.status(500).json({ message: 'Server Error' });
       }
     },
-    addRecord: async (req: ILocalUserRequest & MulterRequest, res: Response) => {
+    addRecord: async (req: MulterRequest, res: Response) => {
       const { entityName } = req.params;
       const values = req.body;
-      console.log('req.files: ', req.files);
+      
+      console.log('----------------------------------------req.files: ', req.files);
+      console.log("values: ", values.data);
 
-      if (req.files) {
-        console.log('req.file: ', req.files);
-      }
       try {
         const entity = await Entity.findOne({
           where: {
@@ -307,7 +306,7 @@ export default () => {
 
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
-          console.log('insert data entity.name: ', entity.name);
+          // console.log('insert data entity.name: ', entity.name);
           // const insertData = await entityQueryInterface.insertRecord(entity, values);
           // console.log('insertData: ', insertData);
           res.status(200).json({ message: 'Record Add' });
