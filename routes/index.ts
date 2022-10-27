@@ -45,7 +45,7 @@ export const getRoutes = () => {
   router.delete('/entity/:entityId', auth.verifyUser, localUserCheck, entityController.deleteEntity);
 
   /*Entity Records */
-  router.post('/entity/:entityName/record', upload.any('file'), auth.verifyUser, localUserCheck, entityController.addRecord);
+  router.post('/entity/:entityName/record', upload.any(), auth.verifyUser, localUserCheck, entityController.addRecord);
   router.put('/entity/:entityName/record/:recordId', auth.verifyUser, localUserCheck, entityController.updateRecord);
   router.delete('/entity/:entityName/record/:recordId', auth.verifyUser, localUserCheck, entityController.deleteRecord);
 

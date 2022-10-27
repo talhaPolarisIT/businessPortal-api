@@ -3,7 +3,7 @@ import EntityQueryInterface from '../db/queries/entity-table';
 
 import { Op } from 'sequelize';
 import { ILocalUserRequest } from '../interceptors/localUserCheck';
-
+import { upload as uploadToBucket } from '../utils/cloudStorage';
 export interface IValues {
   recordId: string;
   value: string;
@@ -285,9 +285,24 @@ export default () => {
     addRecord: async (req: MulterRequest, res: Response) => {
       const { entityName } = req.params;
       const values = req.body;
-      
+
       console.log('----------------------------------------req.files: ', req.files);
-      console.log("values: ", values.data);
+      console.log('values: ', values);
+      if (req.files) {
+        for await (const element of req.files) {
+          try {
+            const url = await uploadToBucket(element.buffer, element.originalname);
+            if (values[element.fieldname] && values[element.fieldname].length > 0) {
+              values[element.fieldname].push(url);
+            } else {
+              values[element.fieldname] = [url];
+            }
+          } catch (err) {
+            console.log('error, ', err);
+          }
+        }
+      }
+      console.log('post values: ', values);
 
       try {
         const entity = await Entity.findOne({
@@ -306,9 +321,9 @@ export default () => {
 
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
-          // console.log('insert data entity.name: ', entity.name);
-          // const insertData = await entityQueryInterface.insertRecord(entity, values);
-          // console.log('insertData: ', insertData);
+          console.log('insert data entity.name: ', entity.name);
+          const insertData = await entityQueryInterface.insertRecord(entity, values);
+          console.log('insertData: ', insertData);
           res.status(200).json({ message: 'Record Add' });
         }
       } catch (error: any) {

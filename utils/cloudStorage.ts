@@ -2,14 +2,14 @@ const { Storage } = require('@google-cloud/storage');
 const stream = require('stream');
 const csv = require('csvtojson');
 
-const GOOGLE_STORAGE_BASE_URL = 'https://storage.googleapis.com';
+const GOOGLE_STORAGE_BASE_URL = 'https://storage.cloud.google.com';
 
 const storage = new Storage({
-  keyFilename: './cloud-storage-config.json',
+  keyFilename: './config/pit-dev3-1fc916f4e392.json',
   projectId: 'pit-dev3',
 });
 
-export const upload = async (data, destFileName, bucketName='test-bucket') => {
+export const upload = async (data, destFileName, bucketName = 'pit-dev3') => {
   // Get a reference to the bucket
   const myBucket = storage.bucket(bucketName);
 
@@ -35,7 +35,7 @@ export const upload = async (data, destFileName, bucketName='test-bucket') => {
   }
 
   const url = await streamFileUpload().catch(console.error);
-  console.log('`${GOOGLE_STORAGE_BASE_URL}/${bucketName}/${fileName}`: ', `${GOOGLE_STORAGE_BASE_URL}/${bucketName}/${fileName}`);
+  console.log("url: ", url);
 
   return `${GOOGLE_STORAGE_BASE_URL}/${bucketName}/${fileName}`;
 };
