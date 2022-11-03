@@ -4,7 +4,7 @@ export const DATA_TYPES = {
   Email: DataTypes.STRING,
   Duration: DataTypes.STRING,
   Link: DataTypes.STRING,
-  Location: DataTypes.STRING,
+  Location: DataTypes.JSON,
   Document: DataTypes.ARRAY(DataTypes.STRING),
   Image: DataTypes.ARRAY(DataTypes.STRING),
   Phone: DataTypes.STRING,

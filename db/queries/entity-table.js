@@ -166,7 +166,7 @@ const _default = () => {
     addColumns: async (tableName, newCols) => {
       try {
         newCols.forEach(async (col) => {
-          await queryInterface.addColumn(tableName, col, { type: DataTypes.STRING });
+          await queryInterface.addColumn(tableName, col, { type: DATA_TYPES[fieldData.dataType], });
         });
         return;
       } catch (error) {
