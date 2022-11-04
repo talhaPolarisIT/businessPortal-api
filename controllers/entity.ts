@@ -254,7 +254,7 @@ export default () => {
           }
           if (req.body.addedFields) {
             const { addedFields } = req.body;
-            await entityQueryInterface.addColumns(databaseName, Object.keys(addedFields));
+            await entityQueryInterface.addColumns(databaseName, addedFields);
           }
           res.status(200).json({ message: `Entity ${databaseName} Updated`, update });
         }

@@ -69,55 +69,67 @@ const _default = () => {
     },
     insertRecord: async (entity, values) => {
       try {
-        // values.createdAt = new Date();
-        // values.updatedAt = new Date();
-        // return await queryInterface.insert(null, entity.databaseName, values);
-
         let error = { isError: false, message: '' };
 
-        let lastRow = await queryInterface.sequelize.query(`SELECT * FROM  ${entity.databaseName} ORDER BY ID DESC LIMIT 1`, { type: QueryTypes.SELECT });
-
-        Object.entries(entity.fields).map((field) => {
+        for (const field of Object.entries(entity.fields)) {
           const [fieldName, fieldData] = field;
           console.log('fieldName: ', fieldName);
+          const { settings } = fieldData;
           switch (fieldData.dataType) {
             case 'Auto Number':
+              const { prefix, prefixCol, subStringDigits: sub, digits } = settings;
+              const prefixArr = [];
+              let lastRow = '';
+              if (prefix) {
+                prefixArr.push(prefix);
+              }
+              if (prefixCol && prefixCol !== '') {
+                const prefixColCurrentValue = values[prefixCol];
+                if (sub) {
+                  let subStringDigits = parseInt(sub);
+                  subStringDigits = subStringDigits <= 0 ? 1 : subStringDigits;
+                  const updatedPrefixColCurrentValue = prefixColCurrentValue.substring(0, subStringDigits);
+                  prefixArr.push(updatedPrefixColCurrentValue);
+                } else {
+                  prefixArr.push(prefixColCurrentValue);
+                }
+              }
+
               let currentValue = 0;
-              if (lastRow && lastRow.length > 0) {
-                if (lastRow[0][fieldName]) {
+
+              if (prefixArr.length > 0) {
+                const pre = `${prefixArr.join('-')}-%`;
+                const query = `SELECT * FROM  ${entity.databaseName} where ${fieldName} like '${pre}' ORDER BY ID DESC LIMIT 1`;
+                console.log('query: ', query);
+                lastRow = await queryInterface.sequelize.query(query, { type: QueryTypes.SELECT });
+                console.log('lastRow: ', lastRow);
+                if (lastRow && lastRow.length > 0 && lastRow[0][fieldName]) {
                   const dataRow = lastRow[0][fieldName].split('-');
                   currentValue = dataRow[dataRow.length - 1];
-                } else {
-                  error.message = 'Not found';
-                  error.isError = true;
-                  return;
-                }
-              }
-              let finalValue = [];
-              if (fieldData.settings.prefix) {
-                finalValue.push(fieldData.settings.prefix);
-              }
-              if (fieldData.settings.prefixCol && fieldData.settings.prefixCol !== '') {
-                console.log('fieldData.settings.prefixCol: ', fieldData.settings.prefixCol);
-                finalValue.push(values[fieldData.settings.prefixCol]);
-              }
-              if (fieldData.settings.digits) {
-                const currentValNum = parseInt(currentValue) + 1;
-                const currentValStr = currentValNum.toString();
-                if (currentValStr.length <= parseInt(fieldData.settings.digits)) {
-                  currentValue = String(currentValNum).padStart(fieldData.settings.digits, '0');
-                } else {
-                  error.message = 'Max Number exceeded';
-                  error.isError = true;
-                  return;
                 }
               } else {
-                currentValue = currentValue + 1;
+                const query = `SELECT * FROM  ${entity.databaseName} ORDER BY ID DESC LIMIT 1`;
+                console.log('query no prefix: ', query);
+                lastRow = await queryInterface.sequelize.query(query, { type: QueryTypes.SELECT });
+                console.log('lastRow with prefix : ', lastRow);
+                if (lastRow && lastRow.length > 0 && lastRow[0][fieldName]) {
+                  currentValue = lastRow[0][fieldName];
+                }
               }
-              finalValue.push(currentValue.toString());
-              console.log('finalValue: ', finalValue);
+              let currentValNum =  parseInt(currentValue) ?  parseInt(currentValue) + 1: 1;
+              const currentValStr = currentValNum.toString();
 
-              values[fieldName] = finalValue.join('-');
+              if (digits && currentValStr.length > parseInt(digits)) {
+                error.message = 'Max Number exceeded';
+                error.isError = true;
+                return;
+              }
+              currentValue = String(currentValNum).padStart(digits, '0');
+              prefixArr.push(currentValue.toString());
+              console.log('prefixArr: ', prefixArr);
+
+              values[fieldName] = prefixArr.join('-').toString();
+
               break;
 
             case 'Email':
@@ -139,11 +151,11 @@ const _default = () => {
             default:
               break;
           }
-        });
-
+        }
         if (!error.isError) {
           values.createdAt = new Date();
           values.updatedAt = new Date();
+          console.log('entering values: ', values);
           return await queryInterface.insert(null, entity.databaseName, values);
         } else {
           return new Error(error.message);
@@ -154,21 +166,21 @@ const _default = () => {
     },
     deleteColumns: async (tableName, deleteColArr) => {
       try {
-        deleteColArr.forEach(async (col) => {
+        for (const col of deleteColArr) {
           await queryInterface.removeColumn(tableName, col);
-        });
-        return;
+        }
       } catch (error) {
         console.log('ERROR: ', error);
       }
     },
 
-    addColumns: async (tableName, newCols) => {
+    addColumns: async (tableName, addedFields) => {
       try {
-        newCols.forEach(async (col) => {
-          await queryInterface.addColumn(tableName, col, { type: DATA_TYPES[fieldData.dataType], });
-        });
-        return;
+        for (const field of Object.entries(addedFields)) {
+          const [fieldName, fieldData] = field;
+          console.log('fieldData;:', fieldData);
+          await queryInterface.addColumn(tableName, fieldName, { type: DATA_TYPES[fieldData.dataType] });
+        }
       } catch (error) {
         console.log('ERROR: ', error);
       }
