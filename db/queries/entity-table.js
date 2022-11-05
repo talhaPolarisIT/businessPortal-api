@@ -39,6 +39,10 @@ const _default = () => {
           autoIncrement: true,
         },
         ...tableFields,
+        isDeleted: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: false,
+        },
         createdAt: {
           type: DataTypes.DATE,
         },
@@ -116,7 +120,7 @@ const _default = () => {
                   currentValue = lastRow[0][fieldName];
                 }
               }
-              let currentValNum =  parseInt(currentValue) ?  parseInt(currentValue) + 1: 1;
+              let currentValNum = parseInt(currentValue) ? parseInt(currentValue) + 1 : 1;
               const currentValStr = currentValNum.toString();
 
               if (digits && currentValStr.length > parseInt(digits)) {
@@ -196,7 +200,10 @@ const _default = () => {
     },
     deleteRecord: async (tableName, recordId) => {
       try {
-        await queryInterface.bulkDelete(tableName, { id: recordId });
+        const values = {isDeleted: true}
+        await queryInterface.bulkUpdate(tableName, values, { id: recordId });
+
+        // await queryInterface.bulkDelete(tableName, { id: recordId });
         return;
       } catch (error) {
         console.log('ERROR: ', error);
