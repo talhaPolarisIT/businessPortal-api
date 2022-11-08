@@ -1,9 +1,11 @@
 import { Response } from 'express';
+import DeepEqual from 'deep-equal';
 import EntityQueryInterface from '../db/queries/entity-table';
 
 import { Op } from 'sequelize';
 import { ILocalUserRequest } from '../interceptors/localUserCheck';
 import { upload as uploadToBucket } from '../utils/cloudStorage';
+import { DATA_TYPES } from '../constants';
 export interface IValues {
   recordId: string;
   value: string;
@@ -95,7 +97,6 @@ export default () => {
         isLinkedEntity,
         linkedEntity,
         createdBy,
-
         entityPermissionsNone,
         entityPermissionsRead,
         entityPermissionsCreate,
@@ -183,7 +184,9 @@ export default () => {
     updateEntity: async (req: ILocalUserRequest, res: Response) => {
       const { entityName } = req.params;
       const { entity } = req.body;
-      console.log('entity: ', entity);
+      const userGroupCodse = req.localUser.userGroupCodes;
+
+      console.log('entity.id: ', entity.id);
 
       const {
         id,
@@ -222,7 +225,101 @@ export default () => {
         if (!entity) res.status(404).json({ message: `Entity Not Found` });
         else {
           console.log('update entity.name: ', entity.name);
+          if (fields) {
+            const fieldsEntry: [string, any][] = Object.entries(fields);
+            for (const newField of fieldsEntry) {
+              const [newFieldName, newFieldData] = newField;
+              console.log('newFieldName, newFieldData: ', newFieldName, newFieldData);
 
+              const { settings: newFieldSettings, dataType: newFieldDataType } = newFieldData;
+              console.log('entity.fields[newFieldName]: ', entity.fields[newFieldName]);
+
+              const { settings: previousFieldSettings } = entity.fields[newFieldName] || {};
+
+              console.log(' previousFieldSettings: ', previousFieldSettings, newFieldName);
+
+              if (newFieldDataType === 'Auto Number' && !!newFieldSettings.isRegenerate && newFieldSettings.isRegenerate) {
+                // compare previous settings with new settings
+                console.log('newFieldDataType: ', newFieldDataType);
+
+                if (!DeepEqual(previousFieldSettings, newFieldSettings)) {
+                  // Implement newFieldSettings
+                  //get all the data from entity data table
+
+                  const tableData = await entityQueryInterface.getEntityDataByName(entity, userGroupCodse);
+                  console.log('tableData as auto number fieldSettings are changed: ', tableData);
+
+                  // update each row.
+
+                  const { prefix, prefixCol, subStringDigits: sub, digits } = newFieldSettings;
+                  const outputArr = [];
+                  const prefixCount = {};
+                  let error = { isError: false, message: '' };
+                  let indexPlusOne = 0;
+                  for (const row of tableData) {
+                    const prefixArr = [];
+                    indexPlusOne = indexPlusOne + 1;
+                    console.log(indexPlusOne, 'row: ', row);
+
+                    // let lastRow = '';
+                    if (prefix) {
+                      prefixArr.push(prefix);
+                    }
+                    if (prefixCol && prefixCol !== '') {
+                      const prefixColCurrentValue = row[prefixCol];
+                      if (sub) {
+                        let subStringDigits = parseInt(sub);
+                        subStringDigits = subStringDigits <= 0 ? 1 : subStringDigits;
+                        const updatedPrefixColCurrentValue = prefixColCurrentValue.substring(0, subStringDigits);
+                        prefixArr.push(updatedPrefixColCurrentValue);
+                      } else {
+                        prefixArr.push(prefixColCurrentValue);
+                      }
+                    }
+
+                    let currentValue = 0;
+                    console.log('prefixCount: pre', prefixCount);
+
+                    if (prefixArr.length > 0) {
+                      const pre = `${prefixArr.join('-')}-%`;
+                      const last = prefixCount[pre];
+                      if (last) {
+                        currentValue = parseInt(last[last.length - 1]) + 1;
+                        prefixCount[pre].push(currentValue);
+                      } else {
+                        prefixCount[pre] = [1];
+                        currentValue = 1;
+                      }
+                    } else {
+                      currentValue = indexPlusOne;
+                    }
+                    console.log('prefixCount: post', prefixCount);
+
+                    const currentValStr = currentValue.toString();
+
+                    if (digits && currentValStr.length > parseInt(digits)) {
+                      error.message = 'Max Number exceeded';
+                      error.isError = true;
+                      return;
+                    }
+                    const currentValueStr = String(currentValue).padStart(digits, '0');
+                    prefixArr.push(currentValueStr.toString());
+                    console.log('prefixArr: ', prefixArr);
+
+                    row[newFieldName] = prefixArr.join('-').toString();
+                    console.log('row: ', row);
+
+                    outputArr.push(row);
+                    const { id, ...remainingValues } = row;
+
+                    const updateData = await entityQueryInterface.updateRecord(entityName, row.id, remainingValues);
+                    console.log('updateData: ', updateData);
+                  }
+                  console.log('output', outputArr);
+                }
+              }
+            }
+          }
           const update = await Entity.update(
             {
               name,
@@ -256,10 +353,13 @@ export default () => {
             const { addedFields } = req.body;
             await entityQueryInterface.addColumns(databaseName, addedFields);
           }
+
           res.status(200).json({ message: `Entity ${databaseName} Updated`, update });
         }
       } catch (error) {
-        res.status(500).json({ message: 'Server Error' });
+        console.log('error: ', error);
+
+        res.status(500).json({ message: 'Server Error', error });
       }
     },
     deleteEntity: async (req: ILocalUserRequest, res: Response) => {
@@ -324,21 +424,72 @@ export default () => {
           console.log('insert data entity.name: ', entity.name);
           const insertData = await entityQueryInterface.insertRecord(entity, values);
           console.log('insertData: ', insertData);
+          if (!!insertData && insertData.isError) {
+            return res.status(500).json({ message: 'Server Error', insertData });
+          }
           res.status(200).json({ message: 'Record Add' });
         }
       } catch (error: any) {
         res.status(500).json({ message: 'Server Error', error });
       }
     },
-    updateRecord: async (req: ILocalUserRequest, res: Response) => {
+    updateRecord: async (req: MulterRequest, res: Response) => {
       const { entityName, recordId } = req.params;
       const values = req.body;
-      try {
-        const updateData = await entityQueryInterface.updateRecord(entityName, recordId, values);
-        res.status(200).json({ message: 'Record updated', updateData });
-      } catch (error: any) {
-        res.status(500).json({ message: 'Server Error' });
+      console.log('entityName, recordId: values', entityName, recordId, values);
+      console.log('----------------------------------------req.files: ', req.files);
+      console.log('values: ', values);
+      if (req.files) {
+        for await (const element of req.files) {
+          try {
+            const url = await uploadToBucket(element.buffer, element.originalname);
+            if (values[element.fieldname] && values[element.fieldname].length > 0) {
+              values[element.fieldname].push(url);
+            } else {
+              values[element.fieldname] = [url];
+            }
+          } catch (err) {
+            console.log('error, ', err);
+          }
+        }
       }
+      console.log('post values: ', values);
+
+      try {
+        const entity = await Entity.findOne({
+          where: {
+            databaseName: entityName,
+            [Op.or]: {
+              entityPermissionsCreate: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+              entityPermissionsDelete: {
+                [Op.overlap]: req.localUser.userGroupCodes,
+              },
+            },
+          },
+        });
+
+        if (!entity) res.status(404).json({ message: `Entity Not Found` });
+        else {
+          console.log('update data entity.name: ', entity.name);
+          const updateData = await entityQueryInterface.updateRecord(entity, entityName, recordId, values);
+          console.log('updateData: ', updateData);
+          if (!!updateData && updateData.isError) {
+            return res.status(500).json({ message: 'Server Error', updateData });
+          }
+          res.status(200).json({ message: 'Record updated', updateData });
+        }
+      } catch (error: any) {
+        res.status(500).json({ message: 'Server Error', error });
+      }
+
+      // try {
+      // const updateData = await entityQueryInterface.updateRecord(entityName, recordId, values);
+      // res.status(200).json({ message: 'Record updated', updateData });
+      // } catch (error: any) {
+      //   res.status(500).json({ message: 'Server Error' });
+      // }
     },
     deleteRecord: async (req: ILocalUserRequest, res: Response) => {
       const { entityName, recordId } = req.params;
