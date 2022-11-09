@@ -5,7 +5,7 @@ const csv = require('csvtojson');
 const GOOGLE_STORAGE_BASE_URL = 'https://storage.cloud.google.com';
 
 const storage = new Storage({
-  keyFilename: './config/pit-dev3-1fc916f4e392.json',
+  keyFilename: './config/pit-dev3-6d32689967ec.json',
   projectId: 'pit-dev3',
 });
 
