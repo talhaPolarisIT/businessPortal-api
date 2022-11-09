@@ -203,7 +203,7 @@ const _default = () => {
     },
     updateRecord: async (entity, tableName, id, values) => {
       // const { id, ...remainingValues } = values;
-      console.log("entity, tableName, id, values: ", entity, tableName, id, values);
+      console.log("tableName, id, values: ",  tableName, id, values);
       try {
         let error = { isError: false, message: '' };
 
@@ -305,7 +305,6 @@ const _default = () => {
           }
         }
         if (!error.isError) {
-          values.createdAt = new Date();
           values.updatedAt = new Date();
           console.log('entering values: ', values);
           return await queryInterface.bulkUpdate(tableName, values, { id });
@@ -313,6 +312,7 @@ const _default = () => {
           return new Error(error.message);
         }
       } catch (e) {
+        console.log('Error ', e);
         console.log('ERROR IS updatetable() -> tableName ', tableName, values);
       }
       // try {

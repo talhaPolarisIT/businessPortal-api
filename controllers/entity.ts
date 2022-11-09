@@ -390,12 +390,14 @@ export default () => {
       console.log('values: ', values);
       if (req.files) {
         for await (const element of req.files) {
+          console.log('element: ', element);
+
           try {
             const url = await uploadToBucket(element.buffer, element.originalname);
             if (values[element.fieldname] && values[element.fieldname].length > 0) {
-              values[element.fieldname].push(url);
+              values[element.fieldname].push({ fileName: element.originalname, url });
             } else {
-              values[element.fieldname] = [url];
+              values[element.fieldname] = [{ fileName: element.originalname, url }];
             }
           } catch (err) {
             console.log('error, ', err);
@@ -436,7 +438,7 @@ export default () => {
     updateRecord: async (req: MulterRequest, res: Response) => {
       const { entityName, recordId } = req.params;
       const values = req.body;
-      console.log('entityName, recordId: values', entityName, recordId, values);
+      console.log('update, ', entityName, recordId);
       console.log('----------------------------------------req.files: ', req.files);
       console.log('values: ', values);
       if (req.files) {
@@ -444,9 +446,9 @@ export default () => {
           try {
             const url = await uploadToBucket(element.buffer, element.originalname);
             if (values[element.fieldname] && values[element.fieldname].length > 0) {
-              values[element.fieldname].push(url);
+              values[element.fieldname].push({ fileName: element.originalname, url });
             } else {
-              values[element.fieldname] = [url];
+              values[element.fieldname] = [{ fileName: element.originalname, url }];
             }
           } catch (err) {
             console.log('error, ', err);
